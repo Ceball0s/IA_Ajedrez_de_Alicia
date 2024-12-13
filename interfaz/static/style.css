@@ -7,6 +7,14 @@ body {
     padding: 10px;
     max-width: 500px;
     min-width: 300px;
+    margin-top: 20px;
+}
+
+#board2 {
+    padding: 10px;
+    max-width: 500px;
+    min-width: 300px;
+    margin-top: 20px;
 }
 
 .navbar {

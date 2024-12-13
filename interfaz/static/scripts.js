@@ -1,9 +1,7 @@
-var board,
-  game = new Chess(),
-  statusEl = $('#status'),
-  fenEl = $('#fen'),
-  pgnEl = $('#pgn');
+var board, game = new Chess(),fenEl = $('#fen'),pgnEl = $('#pgn');
+  // statusEl = $('#status'),
 
+var board2, game2 = new Chess();
 
 // do not pick up pieces if the game is over
 // only pick up pieces for the side to move
@@ -88,12 +86,12 @@ var updateStatus = function() {
     }
   }
 
-  setStatus(status);
+  // setStatus(status);
   getLastCapture();
   createTable();
-  updateScroll();
+  // updateScroll();
 
-  statusEl.html(status);
+  // statusEl.html(status);
   fenEl.html(game.fen());
   pgnEl.html(game.pgn());
 };
@@ -124,7 +122,7 @@ var randomResponse = function() {
 
 var getResponseMove = function() {
     var e = document.getElementById("sel1");
-    var depth = e.options[e.selectedIndex].value;
+    var depth = 0; // implementado en el back
     fen = game.fen()
     $.get($SCRIPT_ROOT + "/move/" + depth + "/" + fen, function(data) {
         game.move(data, {sloppy: true});
@@ -186,13 +184,13 @@ var createTable = function() {
     $('#pgn tr').first().after(html);
 }
 
-var updateScroll = function() {
-    $('#moveTable').scrollTop($('#moveTable')[0].scrollHeight);
-}
+// var updateScroll = function() {
+//     $('#moveTable').scrollTop($('#moveTable')[0].scrollHeight);
+// }
 
-var setStatus = function(status) {
-  document.getElementById("status").innerHTML = status;
-}
+// var setStatus = function(status) {
+//   document.getElementById("status").innerHTML = status;
+// }
 
 var takeBack = function() {
     game.undo();
@@ -226,3 +224,28 @@ var getLastCapture = function() {
         console.log(history[index]["captured"]);
     }
 }
+
+
+// ============================================== tablero 2
+
+var cfg2 = {
+  draggable: true,
+  onDrop: function(source, target) {
+      // Similar lógica al onDrop original
+      var move = game2.move({
+          from: source,
+          to: target,
+          promotion: 'q' // Promoción por simplicidad
+      });
+
+      if (move === null) return 'snapback'; // Movimiento inválido
+      updateStatus2();
+  },
+  onSnapEnd: function() {
+      board2.position(game2.fen());
+  }
+};
+
+setTimeout(function() {
+  board2 = ChessBoard('board2', cfg2);
+}, 0);
