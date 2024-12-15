@@ -25,11 +25,11 @@ def evaluate_board(board, is_white):
 
     # 1. Revisar jaque mate
     if board.es_jaque_mate():
-        return -10000 if board.turn == is_white else 10000
+        return -10000 if is_white else 10000
 
     # 2. Revisar jaque
     if board.es_jaque():
-        score -= 100 if board.turn == is_white else 100
+        score -= 100 if is_white else 100
 
     # 3. Evaluar piezas en ambos tableros
     for tablero in [tablero1, tablero2]:
@@ -72,7 +72,7 @@ def minimax(board, depth, is_maximizing, alpha, beta):
     Implementación del algoritmo Minimax con poda alfa-beta.
     """
     if depth == 0:
-        return evaluate_board(board.copy(),True)
+        return evaluate_board(board.copy(),False)
     
     if is_maximizing:
         board.set_color(chess.BLACK)

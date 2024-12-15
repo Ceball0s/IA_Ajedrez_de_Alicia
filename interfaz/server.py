@@ -1,8 +1,11 @@
 from flask import Flask, render_template, jsonify, request
 #from Proyecto.reglas_tablero import *
-from Proyecto.Minimax import *
+#from Proyecto.Minimax import *
 from Proyecto.tablero_magico import tablero_magico
+from Proyecto.IA_Ajedrez import IA_Ajedrez
+import chess
 import os
+import time
 
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
 
@@ -20,7 +23,13 @@ def get_move():
         tablero1 = chess.Board(fen)
         tablero2 = chess.Board(fen2)
         print("calculado")
-        movimiento = find_best_move(tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK), 3)
+
+        #movimiento = find_best_move(tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK), 3)
+        ia = IA_Ajedrez(profundidad=3)
+        inicio = time.time()
+        movimiento = ia.mejor_movimiento(tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK))
+        fin = time.time()
+        print(f"Tiempo transcurrido: {fin - inicio} segundos")
         tableroMagico = tablero_magico(tablero1,tablero2, chess.BLACK)
         print(movimiento)
         tableroMagico.move(movimiento.from_square, movimiento.to_square)

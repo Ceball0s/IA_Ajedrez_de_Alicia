@@ -57,7 +57,7 @@ class tablero_magico:
 
 
         if not mov in tabla_original.legal_moves:
-            print("movimiento no permitido")
+            #print("movimiento no permitido")
             return False
         elif self.casilla_ocupada(tabla_destino, chess.parse_square(destino)):
             print("casilla ocupada")
@@ -148,8 +148,8 @@ class tablero_magico:
         """
         # Cambiar el turno temporalmente para analizar al oponente
         color_oponente = not self.color
-        self.tablero1.turn = color_oponente
-        self.tablero2.turn = color_oponente
+        #self.tablero1.turn = color_oponente
+        #self.tablero2.turn = color_oponente
 
         # Verificar si el rey del oponente está en jaque en cualquiera de los tableros
         return self.tablero1.is_check() or self.tablero2.is_check()
@@ -161,8 +161,8 @@ class tablero_magico:
         """
         # Cambiar el turno temporalmente para analizar al oponente
         color_oponente = not self.color
-        self.tablero1.turn = color_oponente
-        self.tablero2.turn = color_oponente
+        #self.tablero1.turn = color_oponente
+        #self.tablero2.turn = color_oponente
 
         # Verificar si el rey del oponente está en jaque en cualquiera de los tableros
         rey_en_jaque = self.tablero1.is_check() or self.tablero2.is_check()
@@ -192,15 +192,3 @@ class tablero_magico:
 
         # Si el rey está en jaque y no hay movimientos legales, es jaque mate
         return rey_en_jaque and len(movimientos_legales) == 0
-
-    # def tabla_original_destino(self, origen):
-    #     square = origen)  # Convierte "e4" a un índice (28)
-    #     # Verificar si hay una pieza en la casilla
-    #     piece_tablero1 = self.tablero1.piece_at(square)
-    #     piece_tablero2 = self.tablero2.piece_at(square)
-    #     if piece_tablero1:
-    #         return self.tablero1,self.tablero2
-    #     elif piece_tablero2:
-    #         return self.tablero2,self.tablero1
-    #     else:
-    #         return False,False
