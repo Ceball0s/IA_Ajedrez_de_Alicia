@@ -2,7 +2,8 @@ from flask import Flask, render_template, jsonify, request
 #from Proyecto.reglas_tablero import *
 #from Proyecto.Minimax import *
 from Proyecto.tablero_magico import tablero_magico
-from Proyecto.IA_Ajedrez import IA_Ajedrez
+from Proyecto.IA_ajedrex import IA_Ajedrez
+from Proyecto.Minimax import Minimax
 import chess
 import os
 import time
@@ -25,16 +26,19 @@ def get_move():
         print("calculado")
 
         #movimiento = find_best_move(tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK), 3)
-        ia = IA_Ajedrez(profundidad=3)
+        ia = Minimax(tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK))
         inicio = time.time()
-        movimiento = ia.mejor_movimiento(tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK))
+        movimiento = ia.iterative_deepening(4)
         fin = time.time()
         print(f"Tiempo transcurrido: {fin - inicio} segundos")
-        tableroMagico = tablero_magico(tablero1,tablero2, chess.BLACK)
+        tableroMagico = tablero_magico(tablero1.copy(), tablero2.copy(), chess.BLACK)
         print(movimiento)
-        tableroMagico.move(movimiento.from_square, movimiento.to_square)
-        return jsonify({'tablero1': tablero1.fen(), 'tablero2': tablero2.fen()})
-
+        if tableroMagico.move(movimiento.from_square, movimiento.to_square):
+            tablero1_nuevo, tablero2_nuevo = tableroMagico.get_tableros()
+            print(tablero1)
+            print("fin")
+            return jsonify({'tablero1': tablero1_nuevo.fen(), 'tablero2': tablero2_nuevo.fen()})
+        return jsonify({'error': "xd"})
     # except ValueError as e:
     #     print(e)
     #     return jsonify({'error': str(e)}), 400
@@ -62,12 +66,16 @@ def validate_move():
 
         tablero1 = chess.Board(fen)
         tablero2 = chess.Board(fen2)
-        tableroMagico = tablero_magico(tablero1,tablero2, chess.WHITE)
+        tablero1.turn = chess.BLACK
+        tablero2.turn = chess.BLACK
+        tableroMagico = tablero_magico(tablero1.copy(),tablero2.copy(), chess.WHITE)
         origen = chess.parse_square(from_square)
         destino = chess.parse_square(to_square)
-        tableroMagico.move(origen,destino)
-        tablero1, tablero2 = tableroMagico.get_tableros()
-        return jsonify({'tablero1': tablero1.fen(), 'tablero2': tablero2.fen()})
+        seMovio = tableroMagico.move(origen,destino)
+        tablero1_nuevo, tablero2_nuevo = tableroMagico.get_tableros()
+        if seMovio:
+            return jsonify({'tablero1': tablero1_nuevo.fen(), 'tablero2': tablero2_nuevo.fen()})
+        return jsonify({'mobimiento invalido': "xd"}), 400
 
     except ValueError as e:
         print(e)

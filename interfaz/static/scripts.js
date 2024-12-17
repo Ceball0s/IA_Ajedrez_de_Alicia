@@ -18,7 +18,8 @@ var onDrop = function(source, target) {
     success: function(response) {
         console.log(response);
         if (game.fen() !== response.tablero1 && game2.fen() !== response.tablero2){
-            console.log(response.nuevo_fen);
+            console.log(response.tablero1);
+            console.log(response.tablero2);
             game.load(response.tablero1);
             game2.load(response.tablero2);
             board.position(game.fen());

@@ -1,121 +1,233 @@
 import chess
+import random
+import signal
+import time
+import cProfile
 
-def evaluate_board(board, is_white):
-    """
-    Evalúa el tablero para favorecer una estrategia agresiva.
-    :param board: El estado actual del tablero.
-    :param is_white: True si la IA juega como blancas, False si juega como negras.
-    """
-    score = 0
-    tablero1, tablero2 = board.get_tableros()  # Obtener los tableros de Alicia
+class Minimax:
 
-    # Valores de piezas
-    piece_values = {
-        chess.PAWN: 1,
-        chess.KNIGHT: 3,
-        chess.BISHOP: 3,
-        chess.ROOK: 5,
-        chess.QUEEN: 9,
-        chess.KING: 10000  # Alto valor para priorizar el rey
-    }
+    def __init__(self, magicBOard):
+        self.board = magicBOard
+        self.MAX_DEPTH = 60
+        self.piece_values = {
+            # pawn
+            1:100,
+            # bishop
+            2:310,
+            # knight
+            3:300,
+            # rook
+            4:500,
+            # queen
+            5:900,
+            # king
+            6:99999
+        }
+        self.square_table = square_table = {
+            1: [
+                0, 0, 0, 0, 0, 0, 0, 0,
+                50, 50, 50, 50, 50, 50, 50, 50,
+                10, 10, 20, 30, 30, 20, 10, 10,
+                5, 5, 10, 25, 25, 10, 5, 5,
+                0, 0, 0, 20, 20, 0, 0, 0,
+                5, -5, -10, 0, 0, -10, -5, 5,
+                5, 10, 10, -20, -20, 10, 10, 5,
+                0, 0, 0, 0, 0, 0, 0, 0
+            ],
+            2: [
+                -50, -40, -30, -30, -30, -30, -40, -50,
+                -40, -20, 0, 0, 0, 0, -20, -40,
+                -30, 0, 10, 15, 15, 10, 0, -30,
+                -30, 5, 15, 20, 20, 15, 5, -30,
+                -30, 0, 15, 20, 20, 15, 0, -30,
+                -30, 5, 10, 15, 15, 10, 5, -30,
+                -40, -20, 0, 5, 5, 0, -20, -40,
+                -50, -40, -30, -30, -30, -30, -40, -50,
+            ],
+            3: [
+                -20, -10, -10, -10, -10, -10, -10, -20,
+                -10, 0, 0, 0, 0, 0, 0, -10,
+                -10, 0, 5, 10, 10, 5, 0, -10,
+                -10, 5, 5, 10, 10, 5, 5, -10,
+                -10, 0, 10, 10, 10, 10, 0, -10,
+                -10, 10, 10, 10, 10, 10, 10, -10,
+                -10, 5, 0, 0, 0, 0, 5, -10,
+                -20, -10, -10, -10, -10, -10, -10, -20,
+            ],
+            4: [
+                0, 0, 0, 0, 0, 0, 0, 0,
+                5, 10, 10, 10, 10, 10, 10, 5,
+                -5, 0, 0, 0, 0, 0, 0, -5,
+                -5, 0, 0, 0, 0, 0, 0, -5,
+                -5, 0, 0, 0, 0, 0, 0, -5,
+                -5, 0, 0, 0, 0, 0, 0, -5,
+                -5, 0, 0, 0, 0, 0, 0, -5,
+                0, 0, 0, 5, 5, 0, 0, 0
+            ],
+            5: [
+                -20, -10, -10, -5, -5, -10, -10, -20,
+                -10, 0, 0, 0, 0, 0, 0, -10,
+                -10, 0, 5, 5, 5, 5, 0, -10,
+                -5, 0, 5, 5, 5, 5, 0, -5,
+                0, 0, 5, 5, 5, 5, 0, -5,
+                -10, 5, 5, 5, 5, 5, 0, -10,
+                -10, 0, 5, 0, 0, 0, 0, -10,
+                -20, -10, -10, -5, -5, -10, -10, -20
+            ],
+            6: [
+                -30, -40, -40, -50, -50, -40, -40, -30,
+                -30, -40, -40, -50, -50, -40, -40, -30,
+                -30, -40, -40, -50, -50, -40, -40, -30,
+                -30, -40, -40, -50, -50, -40, -40, -30,
+                -20, -30, -30, -40, -40, -30, -30, -20,
+                -10, -20, -20, -20, -20, -20, -20, -10,
+                20, 20, 0, 0, 0, 0, 20, 20,
+                20, 30, 10, 0, 0, 10, 30, 20
+            ]
+        }
+        # self.board.set_fen(fen)
+        self.leaves_reached = 0
 
-    capture_bonus = 2.0  # Incentiva capturar piezas del oponente
-    safety_penalty = 0.8  # Penaliza piezas propias en peligro
-    safety_bonus = 0.5    # Premia piezas propias seguras
 
-    # 1. Revisar jaque mate
-    if board.es_jaque_mate():
-        return -10000 if is_white else 10000
+    def position_eval(self, tableroMagico):
+        def evaluar_tablero(tablero):
+            score = 0
+            # iterate through the pieces
+            for i in range(1, 7):
+                # eval white pieces
+                w_squares = tablero.pieces(i, chess.WHITE)
+                score += len(w_squares) * self.piece_values[i]
+                for square in w_squares:
+                    score += self.square_table[i][-square]
 
-    # 2. Revisar jaque
-    if board.es_jaque():
-        score -= 100 if is_white else 100
+                b_squares = tablero.pieces(i, chess.BLACK)
+                score -= len(b_squares) * self.piece_values[i]
+                for square in b_squares:
+                    score -= self.square_table[i][square]
 
-    # 3. Evaluar piezas en ambos tableros
-    for tablero in [tablero1, tablero2]:
-        for square in chess.SQUARES:
-            piece = tablero.piece_at(square)
-            if piece:
-                # Obtener el valor base de la pieza
-                value = piece_values.get(piece.piece_type, 0)
+            return score
 
-                # Ajustar puntuación según el color de la IA
-                if piece.color == is_white:
-                    score += value  # Premia piezas propias
-                    is_safe = not tablero.is_attacked_by(not piece.color, square)
-                    if is_safe:
-                        score += value * safety_bonus
-                    else:
-                        score -= value * safety_penalty
-                else:
-                    score -= value  # Penaliza piezas enemigas
-                    is_safe = not tablero.is_attacked_by(not piece.color, square)
-                    if not is_safe:
-                        score += value * capture_bonus
+        valor_negras = evaluar_tablero(tableroMagico.tablero1) + evaluar_tablero(tableroMagico.tablero2)
+        #sincronizacion = len(tableroMagico.generar_movimientos())
+        #jaques = 2 if tableroMagico.es_jaque() else 0
 
-            # Contar atacantes para cada casilla
-            white_attackers = len(tablero.attackers(chess.WHITE, square))
-            black_attackers = len(tablero.attackers(chess.BLACK, square))
-
-            if is_white:
-                score += white_attackers * capture_bonus
-                score -= black_attackers * capture_bonus
-            else:
-                score -= white_attackers * capture_bonus
-                score += black_attackers * capture_bonus
-
-    return score
+        return valor_negras
 
 
-def minimax(board, depth, is_maximizing, alpha, beta):
-    """
-    Implementación del algoritmo Minimax con poda alfa-beta.
-    """
-    if depth == 0:
-        return evaluate_board(board.copy(),False)
+
+    def alpha_beta(self, depth_neg, depth_pos, move, alpha, beta, prev_moves, maximiser, tablero):
+
+        move_sequence = []
+
+        # check if we're at the final search depth
+        if depth_neg == 0:
+            # return move, self.material_eval()
+            move_sequence.append(move)
+            return move_sequence, self.position_eval(tablero)
+
+
+        moves = list(tablero.generar_movimientos())
     
-    if is_maximizing:
-        board.set_color(chess.BLACK)
-        legal_moves = board.generar_movimientos()
-        max_eval = float('-inf')
-        for move in legal_moves:
-            if not board.move(move.from_square,move.to_square):
-                print("no")
-            eval = minimax(board.copy(), depth - 1, False, alpha, beta)
-            board.pop()
-            max_eval = max(max_eval, eval)
-            alpha = max(alpha, eval)
-            if beta <= alpha:
-                break
-        return max_eval
-    else:
-        board.set_color(chess.WHITE)
-        legal_moves = board.generar_movimientos()
-        min_eval = float('inf')
-        for move in legal_moves:
-            #board.move(move.from_square,move.to_square)
-            if not board.move(move.from_square,move.to_square):     
-                print("no")
-            eval = minimax(board.copy(), depth - 1, True, alpha, beta)
-            board.pop()
-            min_eval = min(min_eval, eval)
-            beta = min(beta, eval)
-            if beta <= alpha:
-                break
-        return min_eval
 
-def find_best_move(board, depth):
-    """
-    Encuentra el mejor movimiento para la variante Pierde Gana.
-    """
-    best_move = None
-    best_value = float('-inf')  # Buscamos maximizar la evaluación
-    lista_movimiento = board.generar_movimientos()
-    for move in lista_movimiento:
-        board.move(move.from_square,move.to_square)
-        board_value = minimax(board.copy(), depth - 1, False, float('-inf'), float('inf'))
-        board.pop()
-        if board_value > best_value:
-            best_value = board_value
-            best_move = move
-    return best_move
+        # if there are no legal moves, check for checkmate / stalemate
+        if not moves:
+            if tablero.is_checkmate():
+                if tablero.result() == "1-0":
+                    move_sequence.append(move)
+                    return move_sequence, 1000000
+                elif tablero.result() == "0-1":
+                    move_sequence.append(move)
+                    return move_sequence, -1000000
+            else:
+                move_sequence.append(move)
+                return move_sequence, 0
+
+        # initialise best move variables. What are these used for again? I need to simplify the logic here.
+        best_move = None
+        best_score = -10000001 if maximiser else 10000001
+
+        # put the last calculated best move in first place of the list. Hopefully this improves pruning.
+        if prev_moves and len(prev_moves) >= depth_neg:
+            if depth_neg == 4 and not tablero.color:
+                print(prev_moves[depth_neg - 1])
+            if prev_moves[depth_neg - 1] in moves:
+            # if prev_moves[depth_neg - 1] in self.board.legal_moves:
+                # if not self.board.turn:
+                #     print(prev_moves[depth_neg - 1])
+                moves.insert(0, prev_moves[depth_neg - 1])
+
+
+        if maximiser:
+            for move in moves:
+                self.leaves_reached += 1
+
+                # get score of the new move, record what it is
+                if tablero.move(move.from_square, move.to_square):
+                    new_sequence, new_score = self.alpha_beta(depth_neg - 1, depth_pos + 1, move, alpha, beta, prev_moves, False, tablero.copy())
+                    tablero.pop()
+
+                    # Check whether the new score is better than the best score. If so, replace the best score.
+                    if new_score > best_score:
+                        move_sequence = new_sequence
+                        best_score, best_move = new_score, move
+
+                    # Check whether the new score is better than the beta. If it is, return and break the loop.
+                    # Need to rethink the check against best here.
+                    if new_score >= beta:
+                        # self.check_against_best(best_move, best_score, depth_pos, True)
+                        move_sequence.append(best_move)
+                        return move_sequence, best_score
+                    # Update alpha - upper bound
+                    if new_score > alpha:
+                        alpha = new_score
+            # return the best of the results
+            # self.check_against_best(best_move, best_score, depth_pos, True)
+            move_sequence.append(best_move)
+            return move_sequence, best_score
+
+        if not maximiser:
+            for move in moves:
+                self.leaves_reached += 1
+
+                # get score of the new move, record what it is
+                if tablero.move(move.from_square, move.to_square):
+                    new_sequence, new_score = self.alpha_beta(depth_neg - 1, depth_pos + 1, move, alpha, beta, prev_moves, True, tablero.copy())
+                    tablero.pop()
+
+                    # Check whether the new score is better than the best score. If so, replace the best score.
+                    if new_score < best_score:
+                        move_sequence = new_sequence
+                        best_score, best_move = new_score, move
+
+                    # Check whether the new score is better than the alpha. If it is, return and break the loop
+                    if new_score <= alpha:
+                        # self.check_against_best(best_move, best_score, depth_pos, False)
+                        move_sequence.append(best_move)
+                        return move_sequence, best_score
+
+                    # update beta - lower bound
+                    if new_score < beta:
+                        beta = new_score
+
+            # return the best of the results
+            # self.check_against_best(best_move, best_score, depth_pos, False)
+            move_sequence.append(best_move)
+            return move_sequence, best_score
+
+    
+    def iterative_deepening(self, depth):
+        # depth_neg, depth_pos, move, alpha, beta, prev_moves, maximiser)
+        move_list, score  = self.alpha_beta(1, 0, None, -10000001, 10000001, None, self.board.color, self.board)
+        print(self.board.fen())
+        print("boards")
+        print(self.board.color)
+        for i in range(2, depth + 1):
+            print("Iteration", i)
+            print(self.board.color)
+            move_list, score = self.alpha_beta(i, 0, None, -10000001, 10000001, move_list, self.board.color, self.board)
+        print("boards")
+        print("Depth calculated:", move_list)
+        print(self.board.fen())
+        return move_list[-1]
+
+
