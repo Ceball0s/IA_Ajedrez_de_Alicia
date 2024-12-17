@@ -58,7 +58,7 @@ class tablero_magico:
                 # print("Movimiento de promoción no permitido")
                 return False
 
-        if not mov in tabla_original.legal_moves:
+        if not mov in tabla_original.legal_moves or tabla_original.is_check():
             # print("movimiento no permitido")
             return False
         elif self.casilla_ocupada(tabla_destino, chess.parse_square(destino)):
@@ -66,25 +66,6 @@ class tablero_magico:
             return False
         else:
             return True
-
-
-
-    def generar_movimientos(self):
-        lista_movimiento = []
-
-        # Movimientos del tablero1
-        for move in self.tablero1.legal_moves:
-            if not self.casilla_ocupada(self.tablero2, move.to_square):
-                lista_movimiento.append(move)
-
-        # Movimientos del tablero2
-        for move in self.tablero2.legal_moves:
-            if not self.casilla_ocupada(self.tablero1, move.to_square):
-                lista_movimiento.append(move)
-
-        return lista_movimiento
-
-
 
     def move(self, origen, destino):
         # tabla_original, tabla_destino = self.tabla_original_destino(origen)
@@ -120,8 +101,21 @@ class tablero_magico:
                 return True
         return False   
 
+    def generar_movimientos(self):
+        lista_movimiento = []
 
-    
+        # Movimientos del tablero1
+        for move in self.tablero1.legal_moves:
+            if not self.casilla_ocupada(self.tablero2, move.to_square):
+                lista_movimiento.append(move)
+
+        # Movimientos del tablero2
+        for move in self.tablero2.legal_moves:
+            if not self.casilla_ocupada(self.tablero1, move.to_square):
+                lista_movimiento.append(move)
+
+        return lista_movimiento
+
     def is_capture(self, origen, destino):
         # tabla_original, tabla_destino = self.tabla_original_destino(origen)
         #square = origen)  # Convierte "e4" a un índice (28)
