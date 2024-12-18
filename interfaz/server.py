@@ -23,7 +23,7 @@ def get_move():
         
         tablero1 = chess.Board(fen)
         tablero2 = chess.Board(fen2)
-        print("calculado")
+        # print("calculado")
 
         #movimiento = find_best_move(tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK), 3)
         ia = Minimax(tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK))
@@ -35,7 +35,8 @@ def get_move():
         print(movimiento)
         if tableroMagico.move(movimiento.from_square, movimiento.to_square):
             tablero1_nuevo, tablero2_nuevo = tableroMagico.get_tableros()
-            print(tablero1)
+            print(tablero1_nuevo)
+            print(tablero2_nuevo)
             print("fin")
             return jsonify({'tablero1': tablero1_nuevo.fen(), 'tablero2': tablero2_nuevo.fen()})
         return jsonify({'error': "xd"})
@@ -48,9 +49,6 @@ def get_move():
         return jsonify({'error': f'Missing parameter: {str(e)}'}), 400
 
 
-@app.route('/test/<string:tester>')
-def test_get(tester):
-    return tester
 
 @app.route('/validate_move', methods=['POST'])
 def validate_move():
@@ -66,8 +64,6 @@ def validate_move():
 
         tablero1 = chess.Board(fen)
         tablero2 = chess.Board(fen2)
-        tablero1.turn = chess.BLACK
-        tablero2.turn = chess.BLACK
         tableroMagico = tablero_magico(tablero1.copy(),tablero2.copy(), chess.WHITE)
         origen = chess.parse_square(from_square)
         destino = chess.parse_square(to_square)
@@ -85,13 +81,24 @@ def validate_move():
         print(e)
         return jsonify({'error': f'Missing parameter: {str(e)}'}), 400
 
-@app.route('/puntaje/<path:fen>')
+@app.route('/puntaje/', methods=['POST'])
 def puntaje(fen):
+    fen = data['fen']
+    fen2 = data['fen2']
+    tableroMagico = tablero_magico(tablero1.copy(),tablero2.copy(), chess.WHITE)
+
+    blancas = calcular_puntaje(tableroMagico, chess.WHITE)
+    negras = calcular_puntaje(tableroMagico, chess.BLACK)
     #puntaje_blancas, puntaje_negras = contar_fichas(fen)
     return jsonify({
-        'puntaje_blancas': 0,
-        'puntaje_negras': 0
+        'puntaje_blancas': blancas,
+        'puntaje_negras': negras
     })
+
+
+@app.route('/test/<string:tester>')
+def test_get(tester):
+    return tester
 
 
 def server():

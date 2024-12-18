@@ -40,12 +40,44 @@ class tablero_magico:
 
     # verifica general
     def verificar_movimiento(self, original, destino, tabla_original, tabla_destino):
+        
+        def proxima_posicion_es_jaque(tabla_des):
+            piece_tablero1 = tabla_original.piece_at(original)
+            tabla_des.set_piece_at(destino, piece_tablero1)
+            if tabla_des.is_check():
+                return True
+            else:
+                return False
+        
+        def movimiento_anula_jaque(tabla_or):
+            tabla_or.remove_piece_at(destino)
+            if not tabla_or.is_check():
+                return True
+            else:
+                return False
+        # despues del movimiento sigue abiendo jaque en el mismo tablero entonces el movimeinto es invalido
+        def movimiento_anula_jaque(tabla1, tabla2):
+            if tabla1.is_check():
+                tabla1.remove_piece_at(origen)
+                tabla1.remove_piece_at(destino)
+                tabla2.set_piece_at(destino, piece_tablero1)
+                if tabla1.is_check():
+                    return False
+            if tabla2.is_check():
+                tabla1.remove_piece_at(origen)
+                tabla1.remove_piece_at(destino)
+                tabla2.set_piece_at(destino, piece_tablero1)
+                if tabla2.is_check():
+                    return False
+            return True
+
+        piece_tablero1 = tabla_original.piece_at(original)
         original = chess.square_name(original)
         destino = chess.square_name(destino)
         mov = chess.Move.from_uci(original + destino)
         # Convierte 'destino' a su índice numérico usando chess.parse_square
         destino_idx = chess.parse_square(destino)
-
+        
         # Si el peón llega a la octava fila (para blancas) o a la primera fila (para negras), se promociona
         if (tabla_original.piece_at(mov.from_square).piece_type == chess.PAWN and
             (chess.square_rank(destino_idx) == 7 if tabla_original.piece_at(mov.from_square).color == chess.WHITE else chess.square_rank(destino_idx) == 0)):
@@ -58,11 +90,14 @@ class tablero_magico:
                 # print("Movimiento de promoción no permitido")
                 return False
 
-        if not mov in tabla_original.legal_moves or tabla_original.is_check():
+        if not mov in tabla_original.legal_moves:
             # print("movimiento no permitido")
             return False
         elif self.casilla_ocupada(tabla_destino, chess.parse_square(destino)):
-            # print("casilla ocupada")
+            return False
+        elif piece_tablero1.piece_type == chess.KING and proxima_posicion_es_jaque(tablero_destino.copy()):
+            return False
+        elif (tabla_original.is_check() or tabla_destino.is_check()) and not movimiento_anula_jaque(tabla_original.copy(),tabla_destino.copy()):
             return False
         else:
             return True
@@ -116,7 +151,7 @@ class tablero_magico:
 
         return lista_movimiento
 
-    def is_capture(self, origen, destino):
+    def is_captis_captureure(self, origen, destino):
         # tabla_original, tabla_destino = self.tabla_original_destino(origen)
         #square = origen)  # Convierte "e4" a un índice (28)
         # Verificar si hay una pieza en la casilla
@@ -253,3 +288,42 @@ class tablero_magico:
 
         # Si el rey está en jaque y no hay movimientos legales, es jaque mate
         return rey_en_jaque and len(movimientos_legales) == 0
+
+    def calcular_puntaje(self, color):
+        """
+        Calcula el puntaje del tablero desde la perspectiva del color dado.
+        
+        Args:
+            tableroMagico: Objeto del tablero mágico que contiene tablero1 y tablero2.
+            color: Color para el cual se calcula la ventaja (chess.WHITE o chess.BLACK).
+        
+        Returns:
+            int: Puntaje que indica la ventaja del color especificado.
+        """
+        tableroMagico = self.copy()
+        def evaluar_tablero(tablero, color):
+            score = 0
+            # Iterar a través de las piezas (del 1 al 6)
+            for i in range(1, 7):
+                # Evaluar las piezas del color especificado
+                piezas_color = tablero.pieces(i, color)
+                score += len(piezas_color) * tableroMagico.piece_values[i]
+                for square in piezas_color:
+                    score += tableroMagico.square_table[i][square]
+
+                # Evaluar las piezas del color opuesto
+                piezas_oponente = tablero.pieces(i, not color)
+                score -= len(piezas_oponente) * tableroMagico.piece_values[i]
+                for square in piezas_oponente:
+                    score -= tableroMagico.square_table[i][square]
+
+            return score
+
+        # Evaluar los dos tableros
+        score_tablero1 = evaluar_tablero(tableroMagico.tablero1, color)
+        score_tablero2 = evaluar_tablero(tableroMagico.tablero2, color)
+
+        # Calcular el puntaje total
+        puntaje_total = score_tablero1 + score_tablero2
+
+        return puntaje_total

@@ -115,7 +115,7 @@ class Minimax:
 
 
 
-    def alpha_beta(self, depth_neg, depth_pos, move, alpha, beta, prev_moves, maximiser, tablero):
+    def minimax(self, depth_neg, depth_pos, move, alpha, beta, prev_moves, maximiser, tablero):
 
         move_sequence = []
 
@@ -163,7 +163,7 @@ class Minimax:
 
                 # get score of the new move, record what it is
                 if tablero.move(move.from_square, move.to_square):
-                    new_sequence, new_score = self.alpha_beta(depth_neg - 1, depth_pos + 1, move, alpha, beta, prev_moves, False, tablero.copy())
+                    new_sequence, new_score = self.minimax(depth_neg - 1, depth_pos + 1, move, alpha, beta, prev_moves, False, tablero.copy())
                     tablero.pop()
 
                     # Check whether the new score is better than the best score. If so, replace the best score.
@@ -183,6 +183,8 @@ class Minimax:
             # return the best of the results
             # self.check_against_best(best_move, best_score, depth_pos, True)
             move_sequence.append(best_move)
+            # print(best_move, best_score)
+            # exit()
             return move_sequence, best_score
 
         if not maximiser:
@@ -191,7 +193,7 @@ class Minimax:
 
                 # get score of the new move, record what it is
                 if tablero.move(move.from_square, move.to_square):
-                    new_sequence, new_score = self.alpha_beta(depth_neg - 1, depth_pos + 1, move, alpha, beta, prev_moves, True, tablero.copy())
+                    new_sequence, new_score = self.minimax(depth_neg - 1, depth_pos + 1, move, alpha, beta, prev_moves, True, tablero.copy())
                     tablero.pop()
 
                     # Check whether the new score is better than the best score. If so, replace the best score.
@@ -217,14 +219,14 @@ class Minimax:
     
     def iterative_deepening(self, depth):
         # depth_neg, depth_pos, move, alpha, beta, prev_moves, maximiser)
-        move_list, score  = self.alpha_beta(1, 0, None, -10000001, 10000001, None, self.board.color, self.board)
+        move_list, score  = self.minimax(1, 0, None, -10000001, 10000001, None, self.board.color, self.board)
         print(self.board.fen())
         print("boards")
         print(self.board.color)
         for i in range(2, depth + 1):
             print("Iteration", i)
             print(self.board.color)
-            move_list, score = self.alpha_beta(i, 0, None, -10000001, 10000001, move_list, self.board.color, self.board)
+            move_list, score = self.minimax(i, 0, None, -10000001, 10000001, move_list, self.board.color, self.board)
         print("boards")
         print("Depth calculated:", move_list)
         print(self.board.fen())
