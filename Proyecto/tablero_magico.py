@@ -10,6 +10,82 @@ class tablero_magico:
         self.tablero1_antes = tablero1.copy()
         self.tablero2_antes = tablero2.copy()
         self.promover_peones()
+        self.square_table = { 1: [
+            0, 0, 0, 0, 0, 0, 0, 0,
+            50, 50, 50, 50, 50, 50, 50, 50,
+            10, 10, 20, 30, 30, 20, 10, 10,
+            5, 5, 10, 25, 25, 10, 5, 5,
+            0, 0, 0, 20, 20, 0, 0, 0,
+            5, -5, -10, 0, 0, -10, -5, 5,
+            5, 10, 10, -20, -20, 10, 10, 5,
+            0, 0, 0, 0, 0, 0, 0, 0
+            ],
+            2: [
+                -50, -40, -30, -30, -30, -30, -40, -50,
+                -40, -20, 0, 0, 0, 0, -20, -40,
+                -30, 0, 10, 15, 15, 10, 0, -30,
+                -30, 5, 15, 20, 20, 15, 5, -30,
+                -30, 0, 15, 20, 20, 15, 0, -30,
+                -30, 5, 10, 15, 15, 10, 5, -30,
+                -40, -20, 0, 5, 5, 0, -20, -40,
+                -50, -40, -30, -30, -30, -30, -40, -50,
+            ],
+            3: [
+                -20, -10, -10, -10, -10, -10, -10, -20,
+                -10, 0, 0, 0, 0, 0, 0, -10,
+                -10, 0, 5, 10, 10, 5, 0, -10,
+                -10, 5, 5, 10, 10, 5, 5, -10,
+                -10, 0, 10, 10, 10, 10, 0, -10,
+                -10, 10, 10, 10, 10, 10, 10, -10,
+                -10, 5, 0, 0, 0, 0, 5, -10,
+                -20, -10, -10, -10, -10, -10, -10, -20,
+            ],
+            4: [
+                0, 0, 0, 0, 0, 0, 0, 0,
+                5, 10, 10, 10, 10, 10, 10, 5,
+                -5, 0, 0, 0, 0, 0, 0, -5,
+                -5, 0, 0, 0, 0, 0, 0, -5,
+                -5, 0, 0, 0, 0, 0, 0, -5,
+                -5, 0, 0, 0, 0, 0, 0, -5,
+                -5, 0, 0, 0, 0, 0, 0, -5,
+                0, 0, 0, 5, 5, 0, 0, 0
+            ],
+            5: [
+                -20, -10, -10, -5, -5, -10, -10, -20,
+                -10, 0, 0, 0, 0, 0, 0, -10,
+                -10, 0, 5, 5, 5, 5, 0, -10,
+                -5, 0, 5, 5, 5, 5, 0, -5,
+                0, 0, 5, 5, 5, 5, 0, -5,
+                -10, 5, 5, 5, 5, 5, 0, -10,
+                -10, 0, 5, 0, 0, 0, 0, -10,
+                -20, -10, -10, -5, -5, -10, -10, -20
+            ],
+            6: [
+                -30, -40, -40, -50, -50, -40, -40, -30,
+                -30, -40, -40, -50, -50, -40, -40, -30,
+                -30, -40, -40, -50, -50, -40, -40, -30,
+                -30, -40, -40, -50, -50, -40, -40, -30,
+                -20, -30, -30, -40, -40, -30, -30, -20,
+                -10, -20, -20, -20, -20, -20, -20, -10,
+                20, 20, 0, 0, 0, 0, 20, 20,
+                20, 30, 10, 0, 0, 10, 30, 20
+            ]
+        }
+
+        self.piece_values = {
+            # pawn
+            1:100,
+            # bishop
+            2:310,
+            # knight
+            3:300,
+            # rook
+            4:500,
+            # queen
+            5:900,
+            # king
+            6:99999
+        }
 
     def set_color(self,color):
         self.color = color
@@ -283,41 +359,31 @@ class tablero_magico:
         # Si el rey está en jaque y no hay movimientos legales, es jaque mate
         return rey_en_jaque and len(movimientos_legales) == 0
 
+    
     def calcular_puntaje(self, color):
-        """
-        Calcula el puntaje del tablero desde la perspectiva del color dado.
-        
-        Args:
-            tableroMagico: Objeto del tablero mágico que contiene tablero1 y tablero2.
-            color: Color para el cual se calcula la ventaja (chess.WHITE o chess.BLACK).
-        
-        Returns:
-            int: Puntaje que indica la ventaja del color especificado.
-        """
-        tableroMagico = self.copy()
-        def evaluar_tablero(tablero, color):
-            score = 0
-            # Iterar a través de las piezas (del 1 al 6)
-            for i in range(1, 7):
-                # Evaluar las piezas del color especificado
-                piezas_color = tablero.pieces(i, color)
-                score += len(piezas_color) * tableroMagico.piece_values[i]
-                for square in piezas_color:
-                    score += tableroMagico.square_table[i][square]
+        def color_opuesto(color):
+            return chess.BLACK if color == chess.WHITE else chess.WHITE
 
-                # Evaluar las piezas del color opuesto
-                piezas_oponente = tablero.pieces(i, not color)
-                score -= len(piezas_oponente) * tableroMagico.piece_values[i]
-                for square in piezas_oponente:
-                    score -= tableroMagico.square_table[i][square]
+        def evaluar_tablero(tablero):
+            score = 0
+            for i in range(1, 7):
+                piezas_color = tablero.pieces(i, color)
+                # piezas_oponente = tablero.pieces(i, color_opuesto(color))
+
+                # Sumar valores de piezas propias
+                score += (len(piezas_color) * self.piece_values[i]) / 2
+                for square in piezas_color:
+                    score += (self.square_table[i][square]) / 10
+
+                # Restar valores de piezas enemigas
+                # score -= len(piezas_oponente) * self.piece_values[i]
+                # for square in piezas_oponente:
+                #     score -= self.square_table[i][square]
 
             return score
 
-        # Evaluar los dos tableros
-        score_tablero1 = evaluar_tablero(tableroMagico.tablero1, color)
-        score_tablero2 = evaluar_tablero(tableroMagico.tablero2, color)
+        score_tablero1 = evaluar_tablero(self.tablero1.copy())
+        score_tablero2 = evaluar_tablero(self.tablero2.copy())
 
-        # Calcular el puntaje total
-        puntaje_total = score_tablero1 + score_tablero2
+        return (score_tablero1 + score_tablero2) 
 
-        return puntaje_total

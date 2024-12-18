@@ -82,14 +82,19 @@ def validate_move():
         return jsonify({'error': f'Missing parameter: {str(e)}'}), 400
 
 @app.route('/puntaje/', methods=['POST'])
-def puntaje(fen):
+def puntaje():
+    data = request.get_json()
     fen = data['fen']
     fen2 = data['fen2']
-    tableroMagico = tablero_magico(tablero1.copy(),tablero2.copy(), chess.WHITE)
+    tablero1 = chess.Board(fen)
+    tablero2 = chess.Board(fen2)
+    tableroMagico = tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK)
 
-    blancas = calcular_puntaje(tableroMagico, chess.WHITE)
-    negras = calcular_puntaje(tableroMagico, chess.BLACK)
+    negras =  tableroMagico.calcular_puntaje(chess.BLACK)
+    tableroMagico.set_color(chess.WHITE)
+    blancas = tableroMagico.calcular_puntaje(chess.WHITE)
     #puntaje_blancas, puntaje_negras = contar_fichas(fen)
+    
     return jsonify({
         'puntaje_blancas': blancas,
         'puntaje_negras': negras

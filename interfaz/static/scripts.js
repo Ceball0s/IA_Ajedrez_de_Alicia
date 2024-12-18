@@ -2,9 +2,28 @@ var board, game = new Chess();
   // statusEl = $('#status'),
 
 var board2, game2 = new Chess();
+
 game2.clear();
 
+var corriendo = false;
+
 var onDrop = function(source, target) {
+  if (corriendo) {
+    console.warn("La función ya está en ejecución.");
+    return 'snapback';
+  }
+  console.log(corriendo);
+  // board = Chessboard('board', {
+  //   draggable: true,
+  //   position: game.fen()
+  // });
+  // board2 = Chessboard('board', {
+  //   draggable: true,
+  //   position: game2.fen()
+  // });
+
+  corriendo = true; 
+
   $.ajax({
     url: $SCRIPT_ROOT + "/validate_move",
     method: 'POST',
@@ -26,6 +45,7 @@ var onDrop = function(source, target) {
             board2.position(game2.fen());
             updateStatus();
             getResponseMove();
+            
         } else {
             return 'snapback';
         }
@@ -49,18 +69,33 @@ var onSnapEnd = function() {
 var updateStatus = function() {
 
   // Llamada AJAX para obtener el puntaje
-  $.get($SCRIPT_ROOT + "/puntaje/" + game.fen(), function(data) {
-    // Mostrar los puntajes obtenidos en la respuesta
-    var puntajeBlancas = data.puntaje_blancas;
-    var puntajeNegras = data.puntaje_negras;
-    // checkmate?
-    if (game.in_checkmate() === true || game2.in_checkmate() === true) {
-      $('#puntaje_blancas').text('Game over, is in checkmate.');
-    } else{
+  $.ajax({
+    url: $SCRIPT_ROOT + "/puntaje",
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+        fen: game.fen(),
+        fen2: game2.fen(),
+    }),
+    success: function(response){
+      // Mostrar los puntajes obtenidos en la respuesta
+      var puntajeBlancas = response.puntaje_blancas;
+      var puntajeNegras = response.puntaje_negras;
+      // checkmate?
+      // if (game.in_checkmate() === true || game2.in_checkmate() === true) {
+      //   $('#puntaje_blancas').text('Game over, is in checkmate.');
+      // } else{
       $('#puntaje_blancas').text('Puntaje Blancas: ' + puntajeBlancas);
       $('#puntaje_negras').text('Puntaje Negras: ' + puntajeNegras);
 
-    }
+    },
+    
+    error: function(xhr, status, error) {
+        console.error("Error: " + error);
+        console.error("Response: " + xhr.responseText);
+    },
+    
+    
 
     // Aquí puedes actualizar el HTML con los puntajes
     
@@ -92,7 +127,13 @@ var getResponseMove = function() {
       error: function(xhr, status, error) {
           console.error("Error: " + error);
           console.error("Response: " + xhr.responseText);
-      }
+      },
+      complete: function() {
+        // Asegurarse de que el estado `corriendo` se desbloquee en caso de error también.
+        corriendo = false;
+        // board = ChessBoard('board', cfg);
+        // board2 = ChessBoard('board2', cfg2);
+      } 
     })
     
 }
