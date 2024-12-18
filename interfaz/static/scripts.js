@@ -7,9 +7,11 @@ game2.clear();
 
 var corriendo = false;
 
+
 var onDrop = function(source, target) {
   if (corriendo) {
     console.warn("La función ya está en ejecución.");
+    alert("esperando ia")
     return 'snapback';
   }
   console.log(corriendo);
@@ -47,10 +49,12 @@ var onDrop = function(source, target) {
             getResponseMove();
             
         } else {
+            corriendo = false; 
             return 'snapback';
         }
     },
     error: function(xhr, status, error) {
+        corriendo = false;
         console.error("Error: " + error);
         console.error("Response: " + xhr.responseText);
     }
@@ -95,8 +99,6 @@ var updateStatus = function() {
         console.error("Response: " + xhr.responseText);
     },
     
-    
-
     // Aquí puedes actualizar el HTML con los puntajes
     
   });
@@ -128,6 +130,7 @@ var getResponseMove = function() {
       error: function(xhr, status, error) {
           console.error("Error: " + error);
           console.error("Response: " + xhr.responseText);
+          corriendo = false;
       },
       complete: function() {
         // Asegurarse de que el estado `corriendo` se desbloquee en caso de error también.

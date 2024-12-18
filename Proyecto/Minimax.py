@@ -1,11 +1,7 @@
 import chess
-import random
-import signal
-import time
-import cProfile
+
 
 class Minimax:
-
     def __init__(self, magicBOard):
         self.board = magicBOard
         self.MAX_DEPTH = 60
