@@ -9,6 +9,7 @@ class Minimax:
     def __init__(self, magicBOard):
         self.board = magicBOard
         self.MAX_DEPTH = 60
+        self.transposition_table = {}
         self.piece_values = {
             # pawn
             1:100,
@@ -88,6 +89,12 @@ class Minimax:
         # self.board.set_fen(fen)
         self.leaves_reached = 0
 
+    def generar_clave_tablero(self, tableroMagico):
+        """
+        Genera una clave única para el tablero actual.
+        """
+        return hash(tableroMagico.fen())
+
 
     def position_eval(self, tableroMagico):
         def evaluar_tablero(tablero):
@@ -116,7 +123,8 @@ class Minimax:
 
 
     def minimax(self, depth_neg, depth_pos, move, alpha, beta, prev_moves, maximiser, tablero):
-
+        clave = (self.generar_clave_tablero(tablero), maximiser)
+        
         move_sequence = []
 
         # check if we're at the final search depth
@@ -141,7 +149,7 @@ class Minimax:
             else:
                 move_sequence.append(move)
                 return move_sequence, 0
-
+        
         # initialise best move variables. What are these used for again? I need to simplify the logic here.
         best_move = None
         best_score = -10000001 if maximiser else 10000001
@@ -156,6 +164,9 @@ class Minimax:
                 #     print(prev_moves[depth_neg - 1])
                 moves.insert(0, prev_moves[depth_neg - 1])
 
+        if clave in self.transposition_table:
+            score, move = self.transposition_table[clave]
+            return move, score
 
         if maximiser:
             for move in moves:
@@ -182,9 +193,11 @@ class Minimax:
                         alpha = new_score
             # return the best of the results
             # self.check_against_best(best_move, best_score, depth_pos, True)
-            move_sequence.append(best_move)
+            move_sequence.append(best_score)
             # print(best_move, best_score)
             # exit()
+            self.transposition_table[clave] = (best_score, move_sequence)
+
             return move_sequence, best_score
 
         if not maximiser:
@@ -214,6 +227,7 @@ class Minimax:
             # return the best of the results
             # self.check_against_best(best_move, best_score, depth_pos, False)
             move_sequence.append(best_move)
+            self.transposition_table[clave] = (best_score, move_sequence)
             return move_sequence, best_score
 
     

@@ -121,6 +121,7 @@ var getResponseMove = function() {
             board.position(game.fen()); 
             board2.position(game2.fen());
           }, 100);
+          corriendo = false;
           // board.position(game.fen());
           // board2.position(game2.fen());
       },
@@ -130,7 +131,7 @@ var getResponseMove = function() {
       },
       complete: function() {
         // Asegurarse de que el estado `corriendo` se desbloquee en caso de error también.
-        corriendo = false;
+        
         // board = ChessBoard('board', cfg);
         // board2 = ChessBoard('board2', cfg2);
       } 
