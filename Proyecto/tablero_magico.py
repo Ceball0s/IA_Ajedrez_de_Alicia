@@ -39,34 +39,27 @@ class tablero_magico:
 
 
     # verifica general
-    def verificar_movimiento(self, original, destino, tabla_original, tabla_destino):
-        
-        def proxima_posicion_es_jaque(tabla_des):
-            piece_tablero1 = tabla_original.piece_at(original)
-            tabla_des.set_piece_at(destino, piece_tablero1)
+    def verificar_movimiento(self, original, destino, tabla_original, tabla_destino): 
+        def proxima_posicion_es_jaque(tabla_des, piece_tablero1):
+            tabla_des.set_piece_at(original_dix, piece_tablero1)
             if tabla_des.is_check():
                 return True
             else:
                 return False
-        
-        def movimiento_anula_jaque(tabla_or):
-            tabla_or.remove_piece_at(destino)
-            if not tabla_or.is_check():
-                return True
-            else:
-                return False
+    
         # despues del movimiento sigue abiendo jaque en el mismo tablero entonces el movimeinto es invalido
         def movimiento_anula_jaque(tabla1, tabla2):
+            print("calculando")
             if tabla1.is_check():
-                tabla1.remove_piece_at(origen)
-                tabla1.remove_piece_at(destino)
-                tabla2.set_piece_at(destino, piece_tablero1)
+                tabla1.remove_piece_at(original_dix)
+                tabla1.remove_piece_at(destino_idx)
+                tabla2.set_piece_at(destino_idx, piece_tablero1)
                 if tabla1.is_check():
                     return False
             if tabla2.is_check():
-                tabla1.remove_piece_at(origen)
-                tabla1.remove_piece_at(destino)
-                tabla2.set_piece_at(destino, piece_tablero1)
+                tabla1.remove_piece_at(original_dix)
+                tabla1.remove_piece_at(destino_idx)
+                tabla2.set_piece_at(destino_idx, piece_tablero1)
                 if tabla2.is_check():
                     return False
             return True
@@ -77,6 +70,7 @@ class tablero_magico:
         mov = chess.Move.from_uci(original + destino)
         # Convierte 'destino' a su índice numérico usando chess.parse_square
         destino_idx = chess.parse_square(destino)
+        original_dix = chess.parse_square(original)
         
         # Si el peón llega a la octava fila (para blancas) o a la primera fila (para negras), se promociona
         if (tabla_original.piece_at(mov.from_square).piece_type == chess.PAWN and
@@ -95,7 +89,7 @@ class tablero_magico:
             return False
         elif self.casilla_ocupada(tabla_destino, chess.parse_square(destino)):
             return False
-        elif piece_tablero1.piece_type == chess.KING and proxima_posicion_es_jaque(tablero_destino.copy()):
+        elif piece_tablero1.piece_type == chess.KING and proxima_posicion_es_jaque(tabla_destino.copy(), piece_tablero1):
             return False
         elif (tabla_original.is_check() or tabla_destino.is_check()) and not movimiento_anula_jaque(tabla_original.copy(),tabla_destino.copy()):
             return False
