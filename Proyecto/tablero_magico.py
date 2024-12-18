@@ -159,26 +159,34 @@ class tablero_magico:
             else:
                 # print("Movimiento de promoción no permitido")
                 return False
-
-        if not mov in tabla_original.legal_moves:
-            # Permitimos que el rey se mueva solo si está en una casilla adyacente (como es su movimiento estándar)
-            if piece_tablero1.piece_type == chess.KING:
-                # El rey solo puede moverse a una casilla adyacente
-                fila_original, col_original = chess.square_rank(original), chess.square_file(original)
-                fila_destino, col_destino = chess.square_rank(destino), chess.square_file(destino)
-
-                # Verificamos si el movimiento es adyacente (movimiento estándar del rey)
-                if not abs(fila_original - fila_destino) <= 1 and abs(col_original - col_destino) <= 1:
-                    return False
-            else:
+        rey_puede_mover = False
+        if piece_tablero1.piece_type == chess.KING:
+            # El rey solo puede moverse a una casilla adyacente
+            fila_original, col_original = chess.square_rank(original_dix), chess.square_file(original_dix)
+            fila_destino, col_destino = chess.square_rank(destino_idx), chess.square_file(destino_idx)
+            movimientos_validos = []
+            listaC = [alrededorF for alrededorF in  range(col_original-1, col_original+2)]
+            listaF = [alrededorF for alrededorF in  range(fila_original-1, fila_original+2)]
+            if fila_destino not in listaF and col_destino not in listaC:
+                # print("verdad")
                 return False
+            else:
+                rey_puede_mover = True
+        if not mov in tabla_original.legal_moves and not rey_puede_mover:
+            # Permitimos que el rey se mueva solo si está en una casilla adyacente (como es su movimiento estándar)
+            # print("aqqui cai")
+            return False
         elif self.casilla_ocupada(tabla_destino, chess.parse_square(destino)):
+            # print("ocupada")
             return False
         elif piece_tablero1.piece_type == chess.KING and proxima_posicion_es_jaque(tabla_destino.copy(), piece_tablero1):
+            # print("promxima es jaque")
             return False
         elif (tabla_original.is_check() or tabla_destino.is_check()) and not movimiento_anula_jaque(tabla_original.copy(),tabla_destino.copy()):
+            # print("hay jaque")
             return False
         else:
+            # print("termina")
             return True
 
     def move(self, origen, destino):
