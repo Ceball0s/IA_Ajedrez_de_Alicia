@@ -162,7 +162,7 @@ class tablero_magico:
 
         if not mov in tabla_original.legal_moves:
             # Permitimos que el rey se mueva solo si está en una casilla adyacente (como es su movimiento estándar)
-            if piece_tablero1.piece_type == chess.KING and not proxima_posicion_es_jaque(tabla_destino.copy(), piece_tablero1):
+            if piece_tablero1.piece_type == chess.KING:
                 # El rey solo puede moverse a una casilla adyacente
                 fila_original, col_original = chess.square_rank(original), chess.square_file(original)
                 fila_destino, col_destino = chess.square_rank(destino), chess.square_file(destino)
