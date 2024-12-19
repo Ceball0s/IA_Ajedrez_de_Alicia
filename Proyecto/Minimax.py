@@ -136,15 +136,16 @@ class Minimax:
         # if there are no legal moves, check for checkmate / stalemate
         if not moves:
             if tablero.is_checkmate():
-                if tablero.result() == "1-0":
+                # Si estamos maximizando (negras) y hay jaque mate, ganan las blancas
+                if maximiser:
                     move_sequence.append(move)
-                    return move_sequence, 1000000
-                elif tablero.result() == "0-1":
+                    return move_sequence, 1000000  # negras ganan
+                else:
                     move_sequence.append(move)
-                    return move_sequence, -1000000
+                    return move_sequence, -1000000  # Negras ganan
             else:
                 move_sequence.append(move)
-                return move_sequence, 0
+                return move_sequence, 0  # Empate
         
         # initialise best move variables. What are these used for again? I need to simplify the logic here.
         best_move = None
@@ -232,10 +233,8 @@ class Minimax:
         move_list, score  = self.minimax(1, 0, None, -10000001, 10000001, None, self.board.color, self.board)
         print(self.board.fen())
         print("boards")
-        print(self.board.color)
         for i in range(2, depth + 1):
             print("Iteration", i)
-            print(self.board.color)
             move_list, score = self.minimax(i, 0, None, -10000001, 10000001, move_list, self.board.color, self.board)
         print("boards")
         print("Depth calculated:", move_list)
