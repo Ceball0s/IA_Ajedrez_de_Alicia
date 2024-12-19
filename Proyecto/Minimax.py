@@ -189,10 +189,7 @@ class Minimax:
             # return the best of the results
             # self.check_against_best(best_move, best_score, depth_pos, True)
             move_sequence.append(best_score)
-            # print(best_move, best_score)
-            # exit()
             self.transposition_table[clave] = (best_score, move_sequence)
-
             return move_sequence, best_score
 
         if not maximiser:
