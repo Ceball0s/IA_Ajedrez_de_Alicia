@@ -231,14 +231,14 @@ class Minimax:
     def iterative_deepening(self, depth):
         # depth_neg, depth_pos, move, alpha, beta, prev_moves, maximiser)
         move_list, score  = self.minimax(1, 0, None, -10000001, 10000001, None, self.board.color, self.board)
-        print(self.board.fen())
+        # print(self.board.fen())
         print("boards")
         for i in range(2, depth + 1):
             print("Iteration", i)
             move_list, score = self.minimax(i, 0, None, -10000001, 10000001, move_list, self.board.color, self.board)
         print("boards")
         print("Depth calculated:", move_list)
-        print(self.board.fen())
+        # print(self.board.fen())
         return move_list[-1]
 
 
