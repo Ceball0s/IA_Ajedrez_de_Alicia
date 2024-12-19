@@ -117,10 +117,12 @@ class tablero_magico:
     # verifica general
     def verificar_movimiento(self, original, destino, tabla_original, tabla_destino): 
         def proxima_posicion_es_jaque(tabla_des, piece_tablero1):
-            tabla_des.set_piece_at(original_dix, piece_tablero1)
+            tabla_des.set_piece_at(destino_idx, piece_tablero1)
             if tabla_des.is_check():
+                print("xd")
                 return True
             else:
+                print("falsisimo")
                 return False
     
         # despues del movimiento sigue abiendo jaque en el mismo tablero entonces el movimeinto es invalido
@@ -174,19 +176,20 @@ class tablero_magico:
                 rey_puede_mover = True
         if not mov in tabla_original.legal_moves and not rey_puede_mover:
             # Permitimos que el rey se mueva solo si está en una casilla adyacente (como es su movimiento estándar)
-            # print("aqqui cai")
+            print("aqqui cai")
             return False
         elif self.casilla_ocupada(tabla_destino, chess.parse_square(destino)):
-            # print("ocupada")
-            return False
-        elif piece_tablero1.piece_type == chess.KING and proxima_posicion_es_jaque(tabla_destino.copy(), piece_tablero1):
-            # print("promxima es jaque")
+            print("ocupada")
             return False
         elif (tabla_original.is_check() or tabla_destino.is_check()) and not movimiento_anula_jaque(tabla_original.copy(),tabla_destino.copy()):
-            # print("hay jaque")
+            print("hay jaque")
             return False
+        elif piece_tablero1.piece_type == chess.KING and proxima_posicion_es_jaque(tabla_destino.copy(), piece_tablero1):
+            print("promxima es jaque")
+            return False
+        
         else:
-            # print("termina")
+            print("termina")
             return True
 
     def move(self, origen, destino):
