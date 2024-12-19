@@ -28,7 +28,7 @@ def get_move():
         #movimiento = find_best_move(tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK), 3)
         ia = Minimax(tablero_magico(tablero1.copy(),tablero2.copy(), chess.BLACK))
         inicio = time.time()
-        movimiento = ia.iterative_deepening(9)
+        movimiento = ia.iterative_deepening(4)
         fin = time.time()
         print(f"Tiempo transcurrido: {fin - inicio} segundos")
         tableroMagico = tablero_magico(tablero1.copy(), tablero2.copy(), chess.BLACK)

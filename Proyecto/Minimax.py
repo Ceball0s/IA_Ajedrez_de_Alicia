@@ -83,7 +83,7 @@ class Minimax:
             ]
         }
         # self.board.set_fen(fen)
-        self.leaves_reached = 0
+        
 
     def generar_clave_tablero(self, tableroMagico):
         """
@@ -122,7 +122,6 @@ class Minimax:
         clave = (self.generar_clave_tablero(tablero), maximiser)
         
         move_sequence = []
-
         # check if we're at the final search depth
         if depth_neg == 0:
             # return move, self.material_eval()
@@ -135,14 +134,14 @@ class Minimax:
 
         # if there are no legal moves, check for checkmate / stalemate
         if not moves:
-            if tablero.is_checkmate():
+            if tablero.es_jaque_mate():
                 # Si estamos maximizando (negras) y hay jaque mate, ganan las blancas
                 if maximiser:
                     move_sequence.append(move)
                     return move_sequence, 1000000  # negras ganan
                 else:
                     move_sequence.append(move)
-                    return move_sequence, -1000000  # Negras ganan
+                    return move_sequence, -1000000  # black ganan
             else:
                 move_sequence.append(move)
                 return move_sequence, 0  # Empate
@@ -154,7 +153,8 @@ class Minimax:
         # put the last calculated best move in first place of the list. Hopefully this improves pruning.
         if prev_moves and len(prev_moves) >= depth_neg:
             if depth_neg == 4 and not tablero.color:
-                print(prev_moves[depth_neg - 1])
+                # print(prev_moves[depth_neg - 1])
+                pass
             if prev_moves[depth_neg - 1] in moves:
             # if prev_moves[depth_neg - 1] in self.board.legal_moves:
                 # if not self.board.turn:
@@ -167,8 +167,6 @@ class Minimax:
 
         if maximiser:
             for move in moves:
-                self.leaves_reached += 1
-
                 # get score of the new move, record what it is
                 if tablero.move(move.from_square, move.to_square):
                     new_sequence, new_score = self.minimax(depth_neg - 1, depth_pos + 1, move, alpha, beta, prev_moves, False, tablero.copy())
@@ -199,8 +197,6 @@ class Minimax:
 
         if not maximiser:
             for move in moves:
-                self.leaves_reached += 1
-
                 # get score of the new move, record what it is
                 if tablero.move(move.from_square, move.to_square):
                     new_sequence, new_score = self.minimax(depth_neg - 1, depth_pos + 1, move, alpha, beta, prev_moves, True, tablero.copy())
@@ -232,10 +228,12 @@ class Minimax:
         # depth_neg, depth_pos, move, alpha, beta, prev_moves, maximiser)
         move_list, score  = self.minimax(1, 0, None, -10000001, 10000001, None, self.board.color, self.board)
         # print(self.board.fen())
+        self.transposition_table = {}
         print("boards")
         for i in range(2, depth + 1):
             print("Iteration", i)
             move_list, score = self.minimax(i, 0, None, -10000001, 10000001, move_list, self.board.color, self.board)
+            self.transposition_table = {}
         print("boards")
         print("Depth calculated:", move_list)
         # print(self.board.fen())
