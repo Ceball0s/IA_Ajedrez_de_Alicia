@@ -1,7 +1,5 @@
 <div align="left" style="position: relative;">
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Chess_pawn.svg/1024px-Chess_pawn.svg.png" align="right" width="30%" style="margin: -20px 0 0 20px;">
-
-<h1>IA_AJEDREZ_DE_ALICIA</h1>
+<h1>:chess_pawn: IA AJEDREZ DE ALICIA</h1>
 <p align="left">
 	<em><code>❯ IA_Ajedrez_de_Alicia es un proyecto de inteligencia artificial para jugar ajedrez, basado en el algoritmo Minimax, diseñado para desafiar a jugadores humanos en partidas en tiempo real.</code></em>
 
