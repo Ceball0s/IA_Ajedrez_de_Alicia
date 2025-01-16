@@ -1,5 +1,5 @@
 <div align="left" style="position: relative;">
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Chess_pawn.svg/1024px-Chess_pawn.svg.png" align="right" width="30%" style="margin: -20px 0 0 20px;">
+<img src="https://pics.freeicons.io/uploads/icons/png/7020168201587982142-512.png" align="right" width="30%" style="margin: -20px 0 0 20px;">
 
 <h1>IA_AJEDREZ_DE_ALICIA</h1>
 <p align="left">
