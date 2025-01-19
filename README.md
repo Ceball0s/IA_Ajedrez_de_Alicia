@@ -61,8 +61,7 @@
     ├── Main.py
     ├── Proyecto
     │   ├── Minimax.py
-    │   ├── tablero_magico.py
-    │   └── viejo
+    │   └── tablero_magico.py
     └── interfaz
         ├── __init__.py
         ├── server.py
